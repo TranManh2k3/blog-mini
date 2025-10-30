@@ -6,6 +6,7 @@ const { JWT_SECRET } = require('../config/env');
 const Role = require('../schemas/roles');
 const User = require('../schemas/users');
 
+
 router.post('/register',
   body('email').isEmail(),
   body('password').isLength({ min: 6 }),
@@ -35,17 +36,32 @@ router.post('/login',
   body('password').isLength({ min: 6 }),
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+    if (!errors.isEmpty()) return res.status(400).json({ success:false, errors: errors.array() });
 
     const { email, password } = req.body;
-    const user = await User.findOne({ email, isDeleted: false }).populate('role');
-    if (!user) return res.status(404).json({ success: false, message: 'User không tồn tại' });
+    const user = await User.findOne({ email, isDeleted:false }).populate('role');
+    if (!user) return res.status(404).json({ success:false, message:'User không tồn tại' });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ success: false, message: 'Sai mật khẩu' });
+    if (!ok) return res.status(401).json({ success:false, message:'Sai mật khẩu' });
 
-    const token = jwt.sign({ sub: user._id.toString(), role: user.role.name }, JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ success: true, token, role: user.role.name, displayName: user.displayName });
+    // >>> đổi 'sub' thành 'id', nhúng luôn email/role
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role.name, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return res.json({
+      success: true,
+      token,
+      user: {                               // >>> thêm block user để FE lưu
+        id: user._id.toString(),
+        role: user.role.name,
+        displayName: user.displayName,
+        email: user.email
+      }
+    });
   }
 );
 

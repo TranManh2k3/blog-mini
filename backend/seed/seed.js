@@ -23,6 +23,16 @@ const User = require('../src/schemas/users');
       { upsert: true }
     );
 
+    const userRole = await Role.findOne({ name: 'USER', isDeleted: false });
+    const userEmail = 'user2@example.com';
+    const userPassword = await bcrypt.hash('user123', 10);
+
+    await User.updateOne(
+      { email: userEmail },
+      { $set: { email: userEmail, passwordHash: userPassword, displayName: 'User 2', role: userRole._id, isDeleted: false } },
+      { upsert: true }
+    );
+
     console.log('🌱 Seed done (roles + admin)');
     process.exit(0);
   } catch (e) {

@@ -7,7 +7,7 @@ const authRoute = require('./routes/auth');
 const userRoute = require('./routes/users');
 const testRoute = require('./routes/test');
 const postRoute = require('./routes/posts');
-const commentRoute = require('./routes/comments');
+const commentsRoute = require("./routes/comments");
 
 const app = express();
 app.use(cors());
@@ -16,7 +16,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
 app.use('/api/test', testRoute);
 app.use('/api/posts', postRoute);
-app.use('/api/comments', commentRoute);
+app.use("/api/comments", commentsRoute);
 
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`🚀 Server http://localhost:${PORT}`));
